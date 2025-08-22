@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melyx Invoice Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            color: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 50%);
+            z-index: -1;
+            animation: ambientGlow 8s ease-in-out infinite alternate;
+        }
+        
+        @keyframes ambientGlow {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.6; }
+        }
+        
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        header img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 2px solid #ffd700;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        h1 {
+            color: #ffd700;
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+        
+        h3 {
+            color: #ffd700;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+            border-left: 4px solid #ffd700;
+            border-radius: 8px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        h3:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(0, 0, 0, 0.3) 100%);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        label {
+            display: block;
+            margin: 15px 0 5px 0;
+            color: #f5f5f5;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        input, textarea {
+            background: linear-gradient(135deg, rgba(17, 17, 17, 0.8) 0%, rgba(25, 25, 25, 0.9) 100%);
+            color: #f5f5f5;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            padding: 12px 16px;
+            margin: 5px 0 10px 0;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 
+                0 0 0 3px rgba(255, 215, 0, 0.2),
+                0 5px 20px rgba(255, 215, 0, 0.1);
+            background: linear-gradient(135deg, rgba(25, 25, 25, 0.9) 0%, rgba(35, 35, 35, 0.95) 100%);
+            transform: translateY(-2px);
+        }
+        
+        input:hover, textarea:hover {
+            border-color: rgba(255, 215, 0, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000000;
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            margin: 15px 5px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #ffed4e 0%, #fff176 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        #preview {
+            margin-top: 40px;
+            padding: 30px;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(17, 17, 17, 0.8) 100%);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000000;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        td {
+            background: rgba(17, 17, 17, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 12px 15px;
+            transition: background 0.3s ease;
+        }
+        
+        td:hover {
+            background: rgba(25, 25, 25, 0.8);
+        }
+        
+        td input {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            margin: 0;
+            padding: 8px 12px;
+        }
+        
+        td button {
+            padding: 8px 16px;
+            margin: 0;
+            font-size: 0.85rem;
+            background: linear-gradient(135deg, #ff4444 0%, #ff6b6b 100%);
+            color: white;
+        }
+        
+        td button:hover {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+        }
+        
+        #pdfContainer {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 7.5in;
+            padding: 0.5in;
+            background: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        
+        /* Form sections animation */
+        form {
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Color inputs special styling */
+        input[type="color"] {
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        
+        input[type="color"]:hover {
+            transform: scale(1.1);
+        }
+        
+        /* File input styling */
+        input[type="file"] {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border: 2px dashed rgba(255, 215, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #ffed4e 0%, #fff176 100%);
+        }
+        
+        /* Loading animation for buttons */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid #000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            header { padding: 20px; }
+            button { padding: 12px 20px; margin: 10px 2px; }
+            table { font-size: 0.9rem; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <header>
+        <img src="melyx-logo.png" alt="Melyx Logo">
+        <h1>Melyx</h1>
+    </header>
+    <h2>Premium Invoice Generator</h2>
+    <form id="invoiceForm">
+        <h3>Company Logo</h3>
+        <label>Upload Company Logo: <input type="file" id="company_logo" accept="image/*"></label>
+
+        <h3>Seller Information</h3>
+        <label>Business/Full Name: <input type="text" id="seller_name"></label>
+        <label>Address: <textarea id="seller_address"></textarea></label>
+        <label>Phone Number: <input type="tel" id="seller_phone"></label>
+        <label>Email Address: <input type="email" id="seller_email"></label>
+
+        <h3>Client Information</h3>
+        <label>Business/Full Name: <input type="text" id="buyer_name"></label>
+        <label>Billing Address: <textarea id="buyer_address"></textarea></label>
+
+        <h3>Invoice Details</h3>
+        <label>Unique Invoice Number: <input type="text" id="invoice_number" value="INV-2025-001"></label>
+        <label>Invoice Date: <input type="date" id="invoice_date"></label>
+        <label>Due Date: <input type="date" id="due_date"></label>
+        <label>Purchase Order (PO) Number: <input type="text" id="po_number"></label>
+
+        <h3>Description of Services/Products</h3>
+        <table id="itemsTable">
+            <thead>
+                <tr>
+                    <th>Item/Description</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Line Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <button type="button" onclick="addItemRow()">Add Item</button>
+
+        <label>Subtotal: <input type="number" id="subtotal" readonly value="0.00"></label>
+        <label>Taxes - Rate (%): <input type="number" id="tax_rate" value="0" min="0" oninput="calculateTotals()"></label>
+        <label>Taxes - Amount: <input type="number" id="tax_amount" readonly value="0.00"></label>
+        <label>Discounts: <input type="number" id="discount" value="0" min="0" oninput="calculateTotals()"></label>
+        <label>Grand Total: <input type="number" id="grand_total" readonly value="0.00"></label>
+
+        <h3>Payment Terms & Methods</h3>
+        <textarea id="payment_terms" placeholder="Include bank transfer details, PayPal/Venmo/CashApp links, check mailing address, etc."></textarea>
+
+        <h3>Late Payment Policy</h3>
+        <textarea id="late_policy" placeholder="e.g., A 1.5% monthly finance charge will be applied to all balances over 30 days."></textarea>
+
+        <h3>Breakdown of Hours/Dates</h3>
+        <textarea id="breakdown" placeholder="e.g., Date of Service: Oct 26, 2024 or list of hours worked."></textarea>
+
+        <h3>Thank You Note</h3>
+        <input type="text" id="thank_note" value="Thank you for your business!">
+
+        <h3>Links to Your Work/Portfolio</h3>
+        <input type="text" id="links" placeholder="e.g., https://example.com/project">
+
+        <h3>Payment Instructions</h3>
+        <textarea id="payment_instructions" placeholder="Repeat payment details here if desired."></textarea>
+
+        <h3>Terms and Conditions</h3>
+        <textarea id="terms_conditions" placeholder="Outline policies on revisions, copyright transfer, liability, etc."></textarea>
+
+        <h3>Invoice Theme (at least 5 colors)</h3>
+        <label>Background Color: <input type="color" id="color_bg" value="#ffffff"></label>
+        <label>Text Color: <input type="color" id="color_text" value="#000000"></label>
+        <label>Header Color: <input type="color" id="color_header" value="#333333"></label>
+        <label>Border Color: <input type="color" id="color_border" value="#cccccc"></label>
+        <label>Accent Color: <input type="color" id="color_accent" value="#ffd700"></label>
+    </form>
+
+    <button onclick="generatePreview()">Show Preview</button>
+    <div id="preview"></div>
+    <div id="pdfContainer"></div>
+    <button onclick="downloadHTML()">Download as HTML</button>
+    <button onclick="downloadPNG()">Download as PNG</button>
+
+    <script>
+        let itemCount = 0;
+        let companyLogoUrl = '';
+
+        // Set default invoice date to today
+        document.getElementById('invoice_date').value = new Date().toISOString().split('T')[0];
+
+        // Handle company logo upload
+        document.getElementById('company_logo').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                companyLogoUrl = URL.createObjectURL(file);
+            }
+        });
+
+        function addItemRow() {
+            itemCount++;
+            const tbody = document.querySelector('#itemsTable tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" id="desc_${itemCount}" placeholder="Item/Description"></td>
+                <td><input type="number" id="qty_${itemCount}" value="1" min="0" oninput="calculateLineTotal(${itemCount}); calculateTotals()"></td>
+                <td><input type="number" id="rate_${itemCount}" value="0" min="0" oninput="calculateLineTotal(${itemCount}); calculateTotals()"></td>
+                <td><input type="number" id="amount_${itemCount}" readonly value="0.00"></td>
+                <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function removeRow(button) {
+            button.parentElement.parentElement.remove();
+            calculateTotals();
+        }
+
+        function calculateLineTotal(id) {
+            const qty = parseFloat(document.getElementById(`qty_${id}`).value) || 0;
+            const rate = parseFloat(document.getElementById(`rate_${id}`).value) || 0;
+            document.getElementById(`amount_${id}`).value = (qty * rate).toFixed(2);
+        }
+
+        function calculateTotals() {
+            let sub = 0;
+            for (let i = 1; i <= itemCount; i++) {
+                const amountElem = document.getElementById(`amount_${i}`);
+                if (amountElem) {
+                    sub += parseFloat(amountElem.value) || 0;
+                }
+            }
+            document.getElementById('subtotal').value = sub.toFixed(2);
+
+            const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
+            const tax = sub * (taxRate / 100);
+            document.getElementById('tax_amount').value = tax.toFixed(2);
+
+            const disc = parseFloat(document.getElementById('discount').value) || 0;
+            const grand = sub + tax - disc;
+            document.getElementById('grand_total').value = grand.toFixed(2);
+        }
+
+        function generatePreview() {
+            calculateTotals();
+            const sellerName = document.getElementById('seller_name').value;
+            const sellerAddress = document.getElementById('seller_address').value;
+            const sellerPhone = document.getElementById('seller_phone').value;
+            const sellerEmail = document.getElementById('seller_email').value;
+            const buyerName = document.getElementById('buyer_name').value;
+            const buyerAddress = document.getElementById('buyer_address').value;
+            const invNumber = document.getElementById('invoice_number').value;
+            const invDate = document.getElementById('invoice_date').value;
+            const dueDate = document.getElementById('due_date').value;
+            const poNumber = document.getElementById('po_number').value;
+            const subtotal = document.getElementById('subtotal').value;
+            const taxRate = document.getElementById('tax_rate').value;
+            const taxAmount = document.getElementById('tax_amount').value;
+            const discount = document.getElementById('discount').value;
+            const grandTotal = document.getElementById('grand_total').value;
+            const paymentTerms = document.getElementById('payment_terms').value;
+            const latePolicy = document.getElementById('late_policy').value;
+            const breakdown = document.getElementById('breakdown').value;
+            const thankNote = document.getElementById('thank_note').value;
+            const links = document.getElementById('links').value;
+            const paymentInst = document.getElementById('payment_instructions').value;
+            const termsCond = document.getElementById('terms_conditions').value;
+            const colorBg = document.getElementById('color_bg').value || '#ffffff';
+            const colorText = document.getElementById('color_text').value || '#000000';
+            const colorHeader = document.getElementById('color_header').value || '#333333';
+            const colorBorder = document.getElementById('color_border').value || '#cccccc';
+            const colorAccent = document.getElementById('color_accent').value || '#ffd700';
+
+            let itemsHtml = '';
+            let hasItems = false;
+            for (let i = 1; i <= itemCount; i++) {
+                const descElem = document.getElementById(`desc_${i}`);
+                if (descElem && descElem.value) {
+                    hasItems = true;
+                    const desc = descElem.value;
+                    const qty = document.getElementById(`qty_${i}`).value || '0';
+                    const rate = document.getElementById(`rate_${i}`).value || '0';
+                    const amount = document.getElementById(`amount_${i}`).value || '0.00';
+                    itemsHtml += '<tr>' +
+                        '<td style="border:1px solid ' + colorBorder + '; padding:8px;">' + desc + '</td>' +
+                        '<td style="border:1px solid ' + colorBorder + '; padding:8px;">' + qty + '</td>' +
+                        '<td style="border:1px solid ' + colorBorder + '; padding:8px;">' + rate + '</td>' +
+                        '<td style="border:1px solid ' + colorBorder + '; padding:8px;">' + amount + '</td>' +
+                        '</tr>';
+                }
+            }
+
+            let html = `<div style="background:${colorBg}; color:${colorText}; padding:20px; font-family:Arial, sans-serif; border:1px solid ${colorBorder}; width:7.5in;">`;
+            if (companyLogoUrl) {
+                html += `<img src="${companyLogoUrl}" style="max-width:100px; max-height:100px; display:block; margin-bottom:10px;">`;
+            }
+            html += `<h1 style="color:${colorHeader}; margin:0; font-size:36px;">INVOICE</h1>`;
+
+            if (invNumber) html += `<p style="margin:5px 0;">Invoice #: ${invNumber}</p>`;
+            if (invDate) html += `<p style="margin:5px 0;">Invoice Date: ${invDate}</p>`;
+            if (dueDate) html += `<p style="margin:5px 0;">Due Date: ${dueDate}</p>`;
+            if (poNumber) html += `<p style="margin:5px 0;">PO #: ${poNumber}</p>`;
+
+            if (sellerName || sellerAddress || sellerPhone || sellerEmail) {
+                html += `<h3 style="color:${colorHeader}; margin:10px 0;">From (Seller):</h3>`;
+                if (sellerName) html += `<p style="margin:5px 0;">${sellerName}</p>`;
+                if (sellerAddress) html += `<p style="margin:5px 0;">${sellerAddress.replace(/\n/g, '<br>')}</p>`;
+                if (sellerPhone) html += `<p style="margin:5px 0;">Phone: ${sellerPhone}</p>`;
+                if (sellerEmail) html += `<p style="margin:5px 0;">Email: ${sellerEmail}</p>`;
+            }
+
+            if (buyerName || buyerAddress) {
+                html += `<h3 style="color:${colorHeader}; margin:10px 0;">To (Client):</h3>`;
+                if (buyerName) html += `<p style="margin:5px 0;">${buyerName}</p>`;
+                if (buyerAddress) html += `<p style="margin:5px 0;">${buyerAddress.replace(/\n/g, '<br>')}</p>`;
+            }
+
+            if (hasItems) {
+                html += `<h3 style="color:${colorHeader}; margin:10px 0;">Services/Products:</h3>` +
+                    `<table style="width:100%; border-collapse:collapse; border:1px solid ${colorBorder};">` +
+                    `<tr>` +
+                    `<th style="border:1px solid ${colorBorder}; padding:8px; background:${colorHeader}; color:${colorText};">Description</th>` +
+                    `<th style="border:1px solid ${colorBorder}; padding:8px; background:${colorHeader}; color:${colorText};">Quantity</th>` +
+                    `<th style="border:1px solid ${colorBorder}; padding:8px; background:${colorHeader}; color:${colorText};">Rate</th>` +
+                    `<th style="border:1px solid ${colorBorder}; padding:8px; background:${colorHeader}; color:${colorText};">Amount</th>` +
+                    `</tr>` +
+                    itemsHtml +
+                    `</table>`;
+            }
+
+            if (subtotal && parseFloat(subtotal) > 0) html += `<p style="margin:5px 0;">Subtotal: $${subtotal}</p>`;
+            if (taxRate && parseFloat(taxRate) > 0) html += `<p style="margin:5px 0;">Tax (${taxRate}%): $${taxAmount}</p>`;
+            if (discount && parseFloat(discount) > 0) html += `<p style="margin:5px 0;">Discount: -$${discount}</p>`;
+            if (grandTotal && parseFloat(grandTotal) >= 0) html += `<p style="margin:5px 0;">Grand Total: <span style="font-size:24px; font-weight:bold; color:${colorAccent};">$${grandTotal}</span></p>`;
+
+            if (paymentTerms) html += `<h3 style="color:${colorHeader}; margin:10px 0;">Payment Terms & Methods:</h3><p style="margin:5px 0;">${paymentTerms.replace(/\n/g, '<br>')}</p>`;
+            if (latePolicy) html += `<h3 style="color:${colorHeader}; margin:10px 0;">Late Payment Policy:</h3><p style="margin:5px 0;">${latePolicy.replace(/\n/g, '<br>')}</p>`;
+            if (breakdown) html += `<h3 style="color:${colorHeader}; margin:10px 0;">Breakdown of Hours/Dates:</h3><p style="margin:5px 0;">${breakdown.replace(/\n/g, '<br>')}</p>`;
+            if (thankNote) html += `<p style="margin:5px 0;">${thankNote}</p>`;
+            if (links) html += `<p style="margin:5px 0;">Link to Work/Portfolio: <a href="${links}" style="color:${colorAccent};">${links}</a></p>`;
+            if (paymentInst) html += `<h3 style="color:${colorHeader}; margin:10px 0;">Payment Instructions:</h3><p style="margin:5px 0;">${paymentInst.replace(/\n/g, '<br>')}</p>`;
+            if (termsCond) html += `<h3 style="color:${colorHeader}; margin:10px 0;">Terms and Conditions:</h3><p style="margin:5px 0;">${termsCond.replace(/\n/g, '<br>')}</p>`;
+
+            html += `</div>`;
+            document.getElementById('preview').innerHTML = html;
+            document.getElementById('pdfContainer').innerHTML = html; // Copy to hidden container for PNG
+        }
+
+        function downloadHTML() {
+            const previewContent = document.getElementById('preview').innerHTML;
+            const fullHtml = `<!DOCTYPE html><html><head><title>Invoice</title><style>
+                body { font-family: Arial, sans-serif; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #cccccc; padding: 8px; text-align: left; }
+                h1 { font-size: 36px; }
+                h3 { margin: 10px 0; }
+                p { margin: 5px 0; }
+                img { max-width: 100px; max-height: 100px; }
+            </style></head><body>${previewContent}</body></html>`;
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadPNG() {
+            const element = document.getElementById('pdfContainer');
+            html2canvas(element, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = imgData;
+                a.download = 'invoice.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+    </script>
+</body>
+</html>
+                
